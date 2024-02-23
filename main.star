@@ -64,6 +64,7 @@ def run(
         src="/laravel-app/files/public",
         name="nginx_public_files",
     )
+    nginx_port_id = "http"
 
     nginx_args = {
         "name":nginx_service_name,
@@ -71,6 +72,8 @@ def run(
         "config_files_artifact":nginx_config,
         "root_dirpath":DEFAULT_NGINX_ROOT_DIRPATH,
         "root_file_artifact_name":nginx_public_files,
+        "port_id":nginx_port_id,
+        "port_number":80
     }
 
     nginx.run(
@@ -79,7 +82,7 @@ def run(
     )
 
     get_request_recipe = GetHttpRequestRecipe(
-        port_id = "http",
+        port_id = nginx_port_id,
         endpoint = "/",
     )
 
