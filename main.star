@@ -16,8 +16,13 @@ DEFAULT_NGINX_IMAGE_NAME = "nginx:latest"
 DEFAULT_NGINX_CONFIG_FILE_ARTIFACT = "/nginx/default.conf"
 DEFAULT_NGINX_ROOT_DIRPATH = "/var/www/public"
 
+# Laravel app defaults
+DEFAULT_LARAVEL_APP_SERVICE_NAME="laravel-app"
+DEFAULT_LAREVEL_APP_PORT_NUMBER=9000
+
 def run(
     plan,
+    laravel_app_service_name=DEFAULT_LARAVEL_APP_SERVICE_NAME,
     postgres_service_name=DEFAULT_POSTGRES_SERVICE_NAME,
     postgres_image=DEFAULT_POSTGRES_IMAGE_NAME,
     postgres_db_name=DEFAULT_POSTGRES_DB_NAME,
@@ -31,6 +36,7 @@ def run(
     Starts this Laravel example application.
 
     Args:
+        laravel_app_service_name (string): the Laravel app's service name (default: laravel-app)
         postgres_service_name (string): the Postgres's service name (default: postgres)
         postgres_image (string): the Postgres's container image name and label (default: postgres:alpine)
         postgres_user (string): the Postgres's user name (default: postgres)
@@ -50,11 +56,30 @@ def run(
         database=postgres_db_name,
     )
 
-    laravel_app.run(plan, postgres_db, postgres_password)
+    laravel_app_service = laravel_app.run(plan, laravel_app_service_name, postgres_db, postgres_password)
 
     # uploading the nginx config file
-    nginx_config = plan.upload_files(
-        src="/nginx/default.conf/",
+    # nginx_config = plan.upload_files(
+    #     src="/nginx/default.conf/",
+    #     name="nginx_config",
+    # )
+
+
+    # upload Nginx template
+    nginx_default_conf_contents = read_file(src="./nginx/template/default.conf")
+
+    template_data = {
+        "LaravelAppHostName": laravel_app_service_name,
+        "LaravelAppPortNumber": DEFAULT_LAREVEL_APP_PORT_NUMBER,
+    }
+
+    nginx_conf_file_artifact_name = plan.render_templates(
+        config={
+            "default.conf": struct(
+                template=nginx_default_conf_contents,
+                data=template_data,
+            ),
+        },
         name="nginx_config",
     )
 
@@ -68,7 +93,7 @@ def run(
     nginx_args = {
         "name":nginx_service_name,
         "image":nginx_image_name,
-        "config_files_artifact":nginx_config,
+        "config_files_artifact":nginx_conf_file_artifact_name,
         "root_dirpath":DEFAULT_NGINX_ROOT_DIRPATH,
         "root_file_artifact_name":nginx_public_files,
         "port_id":nginx_port_id,

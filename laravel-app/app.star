@@ -2,7 +2,7 @@ APP_FILES_DIRPATH = "/laravel-app/files"
 POSTGRES_DB_CONNECTION = "pgsql"
 
 
-def run(plan, postgres_db, postgress_password):
+def run(plan, service_name, postgres_db, postgress_password):
     postgres_port = "{}".format(postgres_db.service.ports["postgresql"].number)
 
     # upload app files
@@ -33,9 +33,9 @@ def run(plan, postgres_db, postgress_password):
         },
     )
 
-    backend_service = plan.add_service(
-        name="laravel-app",
+    laravel_app_service = plan.add_service(
+        name=service_name,
         config=service_config_build,
     )
 
-    return backend_service
+    return laravel_app_service
