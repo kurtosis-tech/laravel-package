@@ -15,10 +15,12 @@ DEFAULT_NGINX_SERVICE_NAME = "nginx"
 DEFAULT_NGINX_IMAGE_NAME = "nginx:latest"
 DEFAULT_NGINX_CONFIG_FILE_ARTIFACT = "/nginx/default.conf"
 DEFAULT_NGINX_ROOT_DIRPATH = "/var/www/public"
+DEFAULT_NGINX_PORT_NUMBER=80
 
 # Laravel app defaults
 DEFAULT_LARAVEL_APP_SERVICE_NAME="laravel-app"
 DEFAULT_LAREVEL_APP_PORT_NUMBER=9000
+
 
 def run(
     plan,
@@ -58,17 +60,12 @@ def run(
 
     laravel_app_service = laravel_app.run(plan, laravel_app_service_name, postgres_db, postgres_password)
 
-    # uploading the nginx config file
-    # nginx_config = plan.upload_files(
-    #     src="/nginx/default.conf/",
-    #     name="nginx_config",
-    # )
-
-
-    # upload Nginx template
+    # upload Nginx config template
     nginx_default_conf_contents = read_file(src="./nginx/template/default.conf")
 
     template_data = {
+        "NginxPortNumber":DEFAULT_NGINX_PORT_NUMBER,
+        "NginxRootFolder":DEFAULT_NGINX_ROOT_DIRPATH,
         "LaravelAppHostName": laravel_app_service_name,
         "LaravelAppPortNumber": DEFAULT_LAREVEL_APP_PORT_NUMBER,
     }
@@ -97,7 +94,7 @@ def run(
         "root_dirpath":DEFAULT_NGINX_ROOT_DIRPATH,
         "root_file_artifact_name":nginx_public_files,
         "port_id":nginx_port_id,
-        "port_number":80
+        "port_number":DEFAULT_NGINX_PORT_NUMBER
     }
 
     nginx.run(
