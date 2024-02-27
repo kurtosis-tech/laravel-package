@@ -24,8 +24,8 @@ def run(plan, service_name, postgres_db, postgress_password):
             "DB_USERNAME": postgres_db.user,
             "DB_PASSWORD": postgress_password,
         },
-        #entrypoint=["sh", "-c"],
-        #cmd=[""],
+        entrypoint=["sh", "-c"],
+        cmd=["composer install && php artisan key:generate && chmod -R guo+w storage && php artisan migrate && php-fpm"],
         files={
             "/var/www": Directory(
                 artifact_names=[app_files],
