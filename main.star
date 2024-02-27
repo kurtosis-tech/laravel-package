@@ -1,6 +1,5 @@
 postgres = import_module("github.com/kurtosis-tech/postgres-package/main.star")
-# nginx = import_module("github.com/kurtosis-tech/nginx-package/main.star")
-nginx = import_module("/nginx/nginx.star")
+nginx = import_module("github.com/kurtosis-tech/nginx-package/main.star")
 laravel_app = import_module("/laravel-app/app.star")
 
 # Postgres defaults
