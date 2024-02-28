@@ -1,0 +1,9 @@
+---
+laravel_app_service_name: "laravel-app"
+postgres_service_name: "postgres"
+postgres_image: "postgres:alpine"
+postgres_db_name: "laravel-db"
+postgres_user: "postgres"
+postgres_password: ""
+nginx_service_name: "nginx"
+nginx_image_name: "nginx:latest"
