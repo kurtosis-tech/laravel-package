@@ -21,6 +21,13 @@ Login into the [Kurtosis cloud](https://cloud.kurtosis.com/)
 #### Step 3
 
 Find the package in the catalog and press the `run` button
+<br />
+<img alt="frontend address example" src="./readme-files/laravel-in-catalog.png" />
+<br />
+<br />
+
+This screen record shows the entire run workflow:
+<img alt="run Kurtosis Laravel package in Kurtosis cloud" src="./readme-files/laravel-package-run.gif" />
 
 ### Using the Kurtosis CLI
 
