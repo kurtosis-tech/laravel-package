@@ -39,15 +39,15 @@ class TodoController extends Controller
 
         if ($validator->fails())
         {
-            return redirect()->route('index')->withErrors($validator);
+            return redirect('/')->withErrors($validator);
         }
 
-        
+
         Todo::create([
             'title'=>$request->get('title')
         ]);
 
-               return redirect()->route('index')->with('success', 'Inserted');
+               return redirect('/')->with('success', 'Inserted');
 
     }
 
