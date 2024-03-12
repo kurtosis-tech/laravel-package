@@ -39,7 +39,7 @@ class TodoController extends Controller
 
         if ($validator->fails())
         {
-            return redirect('/')->withErrors($validator);
+            return redirect()->route('index')->withErrors($validator);
         }
 
 
@@ -47,7 +47,7 @@ class TodoController extends Controller
             'title'=>$request->get('title')
         ]);
 
-               return redirect('/')->with('success', 'Inserted');
+               return redirect()->route('index')->with('success', 'Inserted');
 
     }
 
