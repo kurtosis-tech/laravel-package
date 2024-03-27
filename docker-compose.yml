@@ -1,0 +1,55 @@
+services:
+  postgres:
+    image: postgres:alpine
+    #volumes:
+      #- db-data:/var/lib/postgresql/data
+    ports:
+      - :5432
+    environment:
+      - POSTGRES_DB=postgres-db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=secretdatabasepassword
+
+  laravel-app:
+    build:
+      context: ./laravel-app/files
+    volumes:
+      - ./laravel-app/files:/var/www
+    environment:
+      - DB_CONNECTION=pgsql
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_DATABASE=postgres-db
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=secretdatabasepassword
+    command: ["sh", "-c", "composer install && php artisan key:generate && chmod -R guo+w storage && php artisan migrate && php-fpm"]
+    depends_on:
+      - postgres
+    healthcheck:
+      test: ["CMD-SHELL", "php-fpm -t"]
+      interval: 5s
+      timeout: 30s
+      retries: 10
+      start_period: 5s
+
+  gateway:
+    image: nginx:latest
+    ports:
+      - :80
+    volumes:
+      - ./nginx/template:/etc/nginx/templates
+      - ./laravel-app/files/public:/var/www/public
+    environment:
+      - NGINX_PORT_NUMBER=80
+      - NGINX_ROOT_FOLDER=/var/www/public
+      - LARAVEL_APP_HOSTNAME=laravel-app
+      - LARAVEL_APP_PORT_NUMBER=9000
+    depends_on:
+      laravel-app:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail localhost:80"]
+      interval: 5s
+      timeout: 30s
+      retries: 10
+      start_period: 5s
