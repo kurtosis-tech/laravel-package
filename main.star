@@ -19,7 +19,7 @@ DEFAULT_NGINX_PORT_NUMBER=80
 
 # Laravel app defaults
 DEFAULT_LARAVEL_APP_SERVICE_NAME="laravel-app"
-DEFAULT_LAREVEL_APP_PORT_NUMBER=9000
+DEFAULT_LARAVEL_APP_PORT_NUMBER=9000
 
 
 def run(
@@ -61,40 +61,38 @@ def run(
     laravel_app_service = laravel_app.run(plan, laravel_app_service_name, postgres_db, postgres_password)
 
     # upload Nginx config template
-    nginx_default_conf_contents = read_file(src="./nginx/template/default.conf")
-
-    template_data = {
-        "NginxPortNumber":DEFAULT_NGINX_PORT_NUMBER,
-        "NginxRootFolder":DEFAULT_NGINX_ROOT_DIRPATH,
-        "LaravelAppHostName": laravel_app_service_name,
-        "LaravelAppPortNumber": DEFAULT_LAREVEL_APP_PORT_NUMBER,
-    }
-
-    nginx_conf_file_artifact_name = plan.render_templates(
-        config={
-            "default.conf": struct(
-                template=nginx_default_conf_contents,
-                data=template_data,
-            ),
-        },
-        name="nginx_config",
+    nginx_templates = plan.upload_files(
+        src="./nginx/template",
+        name="nginx-templates",
     )
+
+    env_vars = {
+        "NGINX_PORT_NUMBER": "{}".format(DEFAULT_NGINX_PORT_NUMBER),
+        "NGINX_ROOT_FOLDER": DEFAULT_NGINX_ROOT_DIRPATH,
+        "LARAVEL_APP_HOST_NAME": laravel_app_service_name,
+        "LARAVEL_APP_PORT_NUMBER": "{}".format(DEFAULT_LARAVEL_APP_PORT_NUMBER),
+    }
 
     # upload root files
     nginx_public_files = plan.upload_files(
         src="/laravel-app/files/public",
         name="nginx_public_files",
     )
+
+    file_artifacts = {
+        "/etc/nginx/templates": nginx_templates,
+        DEFAULT_NGINX_ROOT_DIRPATH: nginx_public_files,
+    }
+
     nginx_port_id = "http"
 
     nginx_args = {
         "name":nginx_service_name,
         "image":nginx_image_name,
-        "config_files_artifact":nginx_conf_file_artifact_name,
-        "root_dirpath":DEFAULT_NGINX_ROOT_DIRPATH,
-        "root_file_artifact_name":nginx_public_files,
         "port_id":nginx_port_id,
-        "port_number":DEFAULT_NGINX_PORT_NUMBER
+        "port_number":DEFAULT_NGINX_PORT_NUMBER,
+        "file_artifacts":file_artifacts,
+        "env_vars":env_vars,
     }
 
     nginx.run(
